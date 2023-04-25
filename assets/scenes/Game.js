@@ -1,4 +1,11 @@
-import { PLAYER_MOUVEMENTS } from "../../config.js";
+import {
+  PLAYER_MOUVEMENTS,
+  SHAPE_DELAY,
+  SHAPES,
+  CUADRADO,
+  TRIANGULO,
+  ROMBO,
+} from "../../config.js";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -18,8 +25,9 @@ export default class Game extends Phaser.Scene {
     this.load.image("sky", "./assets/images/Cielo.png");
     this.load.image("ninja", "./assets/images/Ninja.png");
     this.load.image("Platform", "./assets/images/platform.png");
-    this.load.image("Triangulo", "./assets/images/Triangulo.png");
-    this.load.image("Rombo", "./assets/images/Rombo.png");
+    this.load.image(TRIANGULO, "./assets/images/Triangulo.png");
+    this.load.image(ROMBO, "./assets/images/Rombo.png");
+    this.load.image(CUADRADO, "./assets/images/Cuadrado.png");
   }
 
   create() {
@@ -37,9 +45,7 @@ export default class Game extends Phaser.Scene {
     this.physics.add.collider(this.ninja, this.platformsGroup);
 
     this.shapeGroup = this.physics.add.group(); //asi se crea un grupo dinamico
-    this.shapeGroup.create(150, 0, "Triangulo");
     this.physics.add.collider(this.shapeGroup, this.platformsGroup);
-    //this.shapeGroup.create(300,0,"Rombo");0
     this.physics.add.overlap(this.ninja, this.shapeGroup, this.collectShape);
     null; //dejar fijo por ahora
     null; //dejar fijo por ahora
@@ -47,6 +53,13 @@ export default class Game extends Phaser.Scene {
     //callback = llamada de regreso
 
     this.cursors = this.input.keyboard.createCursorKeys();
+
+    this.time.addEvent({
+      delay: SHAPE_DELAY,
+      callback: this.addShape,
+      callbackScope: this,
+      loop: true,
+    });
   }
 
   update() {
@@ -66,5 +79,14 @@ export default class Game extends Phaser.Scene {
   collectShape(ninja, figuraChocada) {
     console.log("Figura Recolectada");
     figuraChocada.disableBody(true, true);
+  }
+  addShape() {
+    const randomShape = Phaser.Math.RND.pick(SHAPES);
+
+    const randomX = Phaser.Math.RND.between(0, 800);
+
+    this.shapeGroup.create(randomX, 0, randomShape);
+
+    console.log("Shape is add");
   }
 }
