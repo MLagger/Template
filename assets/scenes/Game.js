@@ -5,6 +5,8 @@ import {
   CUADRADO,
   TRIANGULO,
   ROMBO,
+  PUNTAJES,
+  BOMBA
 } from "../../config.js";
 
 export default class Game extends Phaser.Scene {
@@ -14,11 +16,20 @@ export default class Game extends Phaser.Scene {
 
   init() {
     this.shapesRecolect = {
-      ["Triangulo"]: { count: 0, score: 10 },
-      ["Cuadrado"]: { count: 0, score: 20 },
-      ["Rombo"]: { count: 0, score: 50 },
+      [TRIANGULO]: { count: 0 },
+      [CUADRADO]: { count: 0},
+      [ROMBO]: { count: 0 },
+      [BOMBA]: { count: 0}
     };
 
+    this.shapeScore = {
+      [TRIANGULO]: { score: 0 },
+      [CUADRADO]: { score: 0 },
+      [ROMBO]: { score: 0 },
+      [BOMBA] : {score: 0}
+    };
+ 
+   
     this.isWinner = false;
     this.isGameOver = false;
   }
@@ -31,6 +42,8 @@ export default class Game extends Phaser.Scene {
     this.load.image(TRIANGULO, "./assets/images/Triangulo.png");
     this.load.image(ROMBO, "./assets/images/Rombo.png");
     this.load.image(CUADRADO, "./assets/images/Cuadrado.png");
+    this.load.image(BOMBA,"./assets/images/Bomba.png");
+
   }
 
   create() {
@@ -39,12 +52,15 @@ export default class Game extends Phaser.Scene {
     //this.add.image(200, 550, "ninja");
     //this.add.image(400, 500, "Platform");
     //this.add.image(300, 0, "Rombo");
+    //this.add.image(300, 0, "Bomba");
 
     //agregando fisicas
     this.ninja = this.physics.add.sprite(150, 500, "ninja");
     this.ninja.speed = 200;
     this.platformsGroup = this.physics.add.staticGroup(); //asi se crea un grupo estatico
     this.platformsGroup.create(400, 570, "Platform").setScale(2).refreshBody();
+    this.platformsGroup.create(700, 400, "Platform");
+    this.platformsGroup.create(100, 200, "Platform");
     this.physics.add.collider(this.ninja, this.platformsGroup);
 
     this.shapeGroup = this.physics.add.group(); //asi se crea un grupo dinamico
@@ -72,6 +88,12 @@ export default class Game extends Phaser.Scene {
       fontSize: "20px",
       fill: "#ffffff",
     });
+
+    this.scoreshape = this.add.text(16, 30, "Puntos Totales :", {
+      fontSize: "20px",
+      fill: "#ffffff"
+    })
+
   }
 
   update() {
@@ -102,6 +124,25 @@ export default class Game extends Phaser.Scene {
 
     const shapeName = figuraChocada.texture.key;
     this.shapesRecolect[shapeName].count++;
+    this.shapeScore[shapeName].score += PUNTAJES[shapeName];
+
+    this.scoreshape.setText(
+      "Puntos Totales: " +
+        (this.shapeScore[TRIANGULO].score +
+          this.shapeScore[CUADRADO].score +
+          this.shapeScore[ROMBO].score +
+          this.shapeScore[BOMBA].score)
+    );
+    if (
+      this.shapeScore[TRIANGULO].score +
+        this.shapeScore[CUADRADO].score +
+        this.shapeScore[BOMBA].score +
+        this.shapeScore[ROMBO].score >=
+      100
+    ) {
+      this.isWinner = true;
+    }
+  
 
     this.scoreText.setText(
       " T: " +
@@ -126,9 +167,17 @@ export default class Game extends Phaser.Scene {
     const randomShape = Phaser.Math.RND.pick(SHAPES);
 
     const randomX = Phaser.Math.RND.between(0, 800);
-
+    
+    if (randomShape==BOMBA) {
+      this.shapeGroup.create(randomX, 0, randomShape).setScale(0.10)
+    }else{
     this.shapeGroup.create(randomX, 0, randomShape);
+  }
 
     console.log("Shape is add");
+
+    
+   
+ 
   }
 }
