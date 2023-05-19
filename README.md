@@ -1,5 +1,9 @@
-# Phaser 3 Template
+# NINJA MONCHO
 
-Plantilla para iniciar nuevos proyectos con PHASER 3.
+Es un videojuego hecho por JS con la biblioteca de PHASER, trata de agarrar formas para llegar a los 100 puntos y ganar el juego.
 
-Contiene configuración inicial y buenas prácticas de estructuras de carpetas.
+CONTROLES:
+
+FLECHA IZQUIERDA ,
+FLECHA DERECHA,
+FLECHA ARRIBA
