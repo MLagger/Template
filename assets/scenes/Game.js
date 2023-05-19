@@ -57,18 +57,15 @@ export default class Game extends Phaser.Scene {
     this.physics.add.collider(this.ninja, this.platformsGroup);
 
     this.shapeGroup = this.physics.add.group();
-
-    this.physics.add.collider(this.ninja, this.platformsGroup);
- 
     this.physics.add.collider(this.shapeGroup, this.platformsGroup, null, this.handleShapeCollision, this);
+
     this.shapeGroup = this.physics.add.group({
       bounceY: 1, // Habilitar el rebote vertical
       collideWorldBounds: false // Colisión con los límites del mundo
     });
 
     this.physics.add.collider(this.shapeGroup, this.platformsGroup);
-    this.physics.add.overlap(this.ninja, this.shapeGroup, this.collectShape, null, this)
-    this.physics.add.collider(this.shapeGroup, this.platformsGroup, this.handleShapeCollision, null, this);
+    this.physics.add.overlap(this.ninja, this.shapeGroup, this.collectShape, null, this);
 
     this.shapeGroup.children.iterate((shape) => {
       shape.body.setBounceY(1);
@@ -76,13 +73,13 @@ export default class Game extends Phaser.Scene {
       shape.body.onWorldBounds = true; // Habilitar el evento onWorldBounds para los rebotes con el piso
       shape.body.world.on('worldbounds', () => {
         this.handleShapeCollision(shape, null);
+      });
     });
-  });
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
     this.time.addEvent({
-      delay: SHAPE_DELAY,
+      delay: 1000, // Intervalo reducido a 0.5 segundos (500 milisegundos)
       callback: this.addShape,
       callbackScope: this,
       loop: true
@@ -127,6 +124,7 @@ export default class Game extends Phaser.Scene {
     const shapeName = figuraChocada.texture.key;
     this.shapesRecolect[shapeName].count++;
     this.shapeScore[shapeName].score += PUNTAJES[shapeName];
+    this.shapeScore[shapeName].score -= 1; // Reducir la puntuación en 1 con cada rebote
 
     this.scoreshape.setText(
       "Puntos Totales: " +
@@ -168,7 +166,7 @@ export default class Game extends Phaser.Scene {
     const randomShape = Phaser.Math.RND.pick(SHAPES);
     const randomX = Phaser.Math.RND.between(0, 800);
 
-    if (randomShape == BOMBA) {
+    if (randomShape === BOMBA) {
       this.shapeGroup.create(randomX, 0, randomShape).setScale(0.10);
     } else {
       this.shapeGroup.create(randomX, 0, randomShape);
@@ -186,9 +184,7 @@ export default class Game extends Phaser.Scene {
         shape.disableBody(true, true);
       }
     }
+  }
 }
 
-
-
-  }
 

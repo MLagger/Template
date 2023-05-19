@@ -11,10 +11,10 @@ const CUADRADO = "Cuadrado";
 const BOMBA = "Bomba";
 
 const PUNTAJES = {
-  [ROMBO]: 30,
-  [CUADRADO]: 40,
-  [TRIANGULO]: 50,
-  [BOMBA]: -20
+  [ROMBO]: 15,
+  [CUADRADO]: 10,
+  [TRIANGULO]: 20,
+  [BOMBA]: -25
 };
 
 const PLATFORM = "Platform"
