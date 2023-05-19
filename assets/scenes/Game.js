@@ -34,6 +34,7 @@ export default class Game extends Phaser.Scene {
 
     this.isWinner = false;
     this.isGameOver = false;
+    this.timer = 30
   }
 
   preload() {
@@ -45,10 +46,15 @@ export default class Game extends Phaser.Scene {
     this.load.image(ROMBO, "./assets/images/Rombo.png");
     this.load.image(CUADRADO, "./assets/images/Cuadrado.png");
     this.load.image(BOMBA, "./assets/images/Bomba.png");
+    this.load.image("Pausa", "./assets/images/Pausa.png");
+    this.load.image("controles", "./assets/images/controles.png")
   }
 
   create() {
+
+    
     this.add.image(400, 300, "sky").setScale(0.555);
+    this.add.image(150,400, "controles").setScale(0.15);
 
     this.ninja = this.physics.add.sprite(150, 500, "ninja");
     this.ninja.speed = 200;
@@ -65,6 +71,7 @@ export default class Game extends Phaser.Scene {
 
     this.physics.add.collider(this.shapeGroup, this.platformsGroup);
     this.physics.add.overlap(this.ninja, this.shapeGroup, this.collectShape, null, this);
+    this.physics.add.overlap(this.platformsGroup, this.shapeGroup, this.reduce, null, this);
 
     this.shapeGroup.children.iterate((shape) => {
       shape.body.setBounceY(1);
@@ -82,6 +89,17 @@ export default class Game extends Phaser.Scene {
       callback: this.addShape,
       callbackScope: this,
       loop: true
+    });
+
+    this.time.addEvent({
+      delay: 1000,
+      callback: this.timmer,
+      callbackScope: this,
+      loop: true,
+    });
+
+    this.timeText = this.add.text(500, 16, "Tiempo " + this.timer, {
+      fontSize: "30px",
     });
 
     this.scoreText = this.add.text(16, 16, "T: 0/ C: 0/ R:0 ", {
@@ -114,6 +132,7 @@ export default class Game extends Phaser.Scene {
 
     if (this.cursors.up.isDown && this.ninja.body.touching.down) {
       this.ninja.setVelocityY(-PLAYER_MOUVEMENTS.y);
+    
     }
   }
 
@@ -122,7 +141,7 @@ export default class Game extends Phaser.Scene {
 
     const shapeName = figuraChocada.texture.key;
     this.shapesRecolect[shapeName].count++;
-    this.shapeScore[shapeName].score += PUNTAJES[shapeName];
+    this.shapeScore[shapeName].score += PUNTAJES[shapeName] * figuraChocada.getData(POINTS_PERCENTAGE);
     this.shapeScore[shapeName].score -= 1; // Reducir la puntuación en 1 con cada rebote
 
     this.scoreshape.setText(
@@ -166,44 +185,52 @@ export default class Game extends Phaser.Scene {
     const randomX = Phaser.Math.RND.between(0, 800);
 
     if (randomShape === BOMBA) {
-      this.shapeGroup.create(randomX, 0, randomShape).setScale(0.15)
-      .setBounce(0.8)
-      .setData(POINTS_PERCENTAGE, POINTS_PERCENTAGE_VALUE_START); 
+      this.shapeGroup.create(randomX, 0, randomShape).setScale(0.12)
+        .setBounce(0.8)
+        .setData(POINTS_PERCENTAGE, POINTS_PERCENTAGE_VALUE_START);
     } else {
       this.shapeGroup.create(randomX, 0, randomShape)
-      .setCircle(32,0,0)
-      .setBounce(0.8)
-      .setData(POINTS_PERCENTAGE, POINTS_PERCENTAGE_VALUE_START); 
+        .setCircle(32, 0, 0)
+        .setBounce(0.8)
+        .setData(POINTS_PERCENTAGE, POINTS_PERCENTAGE_VALUE_START);
     }
   }
-  
+
+  timmer() {
+    this.timer--;
+    console.log(this.timer);
+    this.timeText.setText("Tiempo " + this.timer);
+    if(this.timer==0){
+      this.isGameOver= true;
+    }
+  }
+
 
   handleShapeCollision(shape, platform) {
     const shapeName = shape.texture.key;
-  
+
     if (platform && platform.texture.key === PLATFORM) {
       const hasCollided = shape.getData('hasCollided');
-  
+
       if (!hasCollided) {
         this.shapeScore[shapeName].score -= 1;
         shape.setData('hasCollided', true);
-  
+
         if (this.shapeScore[shapeName].score <= 0) {
           shape.disableBody(true, true);
         }
       }
     }
   }
-  reduce(Platform,shapeGroup){
+
+  reduce(Platform, shapeGroup) {
     const newPercentage = shapeGroup.getData(POINTS_PERCENTAGE) - 0.25;
     console.log(shapeGroup.texture.key, newPercentage);
     shapeGroup.setData(POINTS_PERCENTAGE, newPercentage);
     if (newPercentage <= 0) {
       shapeGroup.disableBody(true, true);
       return;
+    }
   }
-}
-}
-
   
-
+}

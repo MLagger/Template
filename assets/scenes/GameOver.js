@@ -5,13 +5,11 @@ export default class GameOver extends Phaser.Scene {
 
   init() {}
 
-  preload() {}
-
+  preload() {
+  this.load.image("gameOver", "./assets/images/gameOver.jpg")
+}
   create() {
-    this.add.text(300, 300, "YOU LOSE", {
-      fontSize: "50px",
-      fill: "#fff",
-    });
+   this.add.image(380,300,"gameOver").setScale(0.4)
   }
 
   update() {}
