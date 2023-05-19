@@ -4,6 +4,6 @@ Es un videojuego hecho por JS con la biblioteca de PHASER, trata de agarrar form
 
 CONTROLES:
 
-FLECHA IZQUIERDA
-FLECHA DERECHA
+FLECHA IZQUIERDA ,
+FLECHA DERECHA,
 FLECHA ARRIBA
