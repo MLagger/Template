@@ -7,7 +7,9 @@ import {
   ROMBO,
   PUNTAJES,
   BOMBA,
-  PLATFORM
+  PLATFORM,
+  POINTS_PERCENTAGE_VALUE_START,
+  POINTS_PERCENTAGE
 } from "../../config.js";
 
 export default class Game extends Phaser.Scene {
@@ -51,13 +53,10 @@ export default class Game extends Phaser.Scene {
     this.ninja = this.physics.add.sprite(150, 500, "ninja");
     this.ninja.speed = 200;
     this.platformsGroup = this.physics.add.staticGroup();
-    this.platformsGroup.create(400, 570, "Platform").setScale(2).refreshBody();
-    this.platformsGroup.create(700, 400, "Platform");
-    this.platformsGroup.create(100, 200, "Platform");
+    this.platformsGroup.create(400, 570, PLATFORM).setScale(2).refreshBody();
+    this.platformsGroup.create(700, 400, PLATFORM);
+    this.platformsGroup.create(100, 200, PLATFORM);
     this.physics.add.collider(this.ninja, this.platformsGroup);
-
-    this.shapeGroup = this.physics.add.group();
-    this.physics.add.collider(this.shapeGroup, this.platformsGroup, null, this.handleShapeCollision, this);
 
     this.shapeGroup = this.physics.add.group({
       bounceY: 1, // Habilitar el rebote vertical
@@ -72,14 +71,14 @@ export default class Game extends Phaser.Scene {
       shape.body.setCollideWorldBounds(true);
       shape.body.onWorldBounds = true; // Habilitar el evento onWorldBounds para los rebotes con el piso
       shape.body.world.on('worldbounds', () => {
-        this.handleShapeCollision(shape, null);
+        this.handleShapeCollision(shape, PLATFORM);
       });
     });
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
     this.time.addEvent({
-      delay: 1000, // Intervalo reducido a 0.5 segundos (500 milisegundos)
+      delay: SHAPE_DELAY,
       callback: this.addShape,
       callbackScope: this,
       loop: true
@@ -167,24 +166,44 @@ export default class Game extends Phaser.Scene {
     const randomX = Phaser.Math.RND.between(0, 800);
 
     if (randomShape === BOMBA) {
-      this.shapeGroup.create(randomX, 0, randomShape).setScale(0.10);
+      this.shapeGroup.create(randomX, 0, randomShape).setScale(0.15)
+      .setBounce(0.8)
+      .setData(POINTS_PERCENTAGE, POINTS_PERCENTAGE_VALUE_START); 
     } else {
-      this.shapeGroup.create(randomX, 0, randomShape);
+      this.shapeGroup.create(randomX, 0, randomShape)
+      .setCircle(32,0,0)
+      .setBounce(0.8)
+      .setData(POINTS_PERCENTAGE, POINTS_PERCENTAGE_VALUE_START); 
     }
   }
+  
 
   handleShapeCollision(shape, platform) {
     const shapeName = shape.texture.key;
-
-    // Verificar si la colisión se produce con una plataforma
-    if (PLATFORM && PLATFORM.gameObject && platform.gameObject.texture.key === PLATFORM) {
-      this.shapeScore[shapeName].score -= 1;
-
-      if (this.shapeScore[shapeName].score <= 0) {
-        shape.disableBody(true, true);
+  
+    if (platform && platform.texture.key === PLATFORM) {
+      const hasCollided = shape.getData('hasCollided');
+  
+      if (!hasCollided) {
+        this.shapeScore[shapeName].score -= 1;
+        shape.setData('hasCollided', true);
+  
+        if (this.shapeScore[shapeName].score <= 0) {
+          shape.disableBody(true, true);
+        }
       }
     }
   }
+  reduce(Platform,shapeGroup){
+    const newPercentage = shapeGroup.getData(POINTS_PERCENTAGE) - 0.25;
+    console.log(shapeGroup.texture.key, newPercentage);
+    shapeGroup.setData(POINTS_PERCENTAGE, newPercentage);
+    if (newPercentage <= 0) {
+      shapeGroup.disableBody(true, true);
+      return;
+  }
+}
 }
 
+  
 
