@@ -98,7 +98,7 @@ export default class Game extends Phaser.Scene {
       loop: true,
     });
 
-    this.timeText = this.add.text(500, 16, "Tiempo " + this.timer, {
+    this.timeText = this.add.text(500, 16, "Tiempo :" + this.timer, {
       fontSize: "30px",
     });
 
